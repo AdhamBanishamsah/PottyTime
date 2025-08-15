@@ -2,6 +2,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { soundManager } from '@/utils/sound';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
@@ -35,6 +36,11 @@ export default function RemindersScreen() {
   const colorScheme = useColorScheme();
   const { t } = useLanguage();
   const [reminders, setReminders] = useState<Reminder[]>([]);
+
+  // Load sounds when component mounts
+  useEffect(() => {
+    soundManager.loadSounds();
+  }, []);
 
   // Initialize and update reminders when language changes
   useEffect(() => {
@@ -105,7 +111,7 @@ export default function RemindersScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState('AM');
   const [selectedIcon, setSelectedIcon] = useState('clock.fill');
 
-  const handleToggleEnabled = (id: string) => {
+  const handleToggleEnabled = async (id: string) => {
     setReminders(prev => 
       prev.map(reminder => 
         reminder.id === id 
@@ -113,6 +119,17 @@ export default function RemindersScreen() {
           : reminder
       )
     );
+    
+    // Play reminder sound when enabling a reminder
+    const updatedReminders = reminders.map(reminder => 
+      reminder.id === id 
+        ? { ...reminder, enabled: !reminder.enabled }
+        : reminder
+    );
+    const reminder = updatedReminders.find(r => r.id === id);
+    if (reminder?.enabled) {
+      await soundManager.playReminderSound();
+    }
   };
 
   const handleAddReminder = () => {

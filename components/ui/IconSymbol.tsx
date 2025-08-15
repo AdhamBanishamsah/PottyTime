@@ -38,6 +38,9 @@ const MAPPING = {
   'book.fill': 'book',
   'plus.circle.fill': 'add-circle',
   'trash.fill': 'delete',
+  'xmark.circle.fill': 'cancel',
+  'globe': 'language',
+  'arrow.up.right': 'open-in-new',
 } as IconMapping;
 
 /**

@@ -47,6 +47,7 @@ PottyTime is a child-friendly mobile application built with React Native and Exp
 ### ⚙️ Settings
 - **Language Selection**: Choose from 3 supported languages
 - **Notification Preferences**: Customize reminder settings
+- **About Potty Pal**: Detailed app information with developer links
 - **App Information**: Version details and developer info
 
 ### 🎬 Loading Screen
@@ -63,6 +64,8 @@ PottyTime is a child-friendly mobile application built with React Native and Exp
 - **UI Components**: Custom components with Tailwind-inspired styling
 - **Icons**: SF Symbols with Material Icons fallback
 - **Storage**: AsyncStorage for language persistence
+- **External Links**: Deep linking to developer websites
+- **Modals**: Interactive information displays
 
 ## 📱 Screenshots
 
@@ -85,6 +88,11 @@ PottyTime is a child-friendly mobile application built with React Native and Exp
 - Unlockable badges and achievements
 - Progress visualization
 - Motivational reward system
+
+### Settings
+- Language selection with real-time updates
+- Notification preferences
+- About section with developer information and links
 
 ## 🚀 Getting Started
 
@@ -163,6 +171,7 @@ All text, including:
 - Reminder titles
 - Settings options
 - Loading messages
+- About section content
 
 ## 🎨 Design Philosophy
 
@@ -184,6 +193,12 @@ All text, including:
 3. Update translations if needed
 4. Test across all supported languages
 
+### Adding New Settings Options
+1. Add new setting item in `app/(tabs)/settings.tsx`
+2. Create modal or navigation for the feature
+3. Update translations for new settings
+4. Test functionality across languages
+
 ## 📄 License
 
 This project is developed by Adham Banishamsah. All rights reserved.
@@ -193,6 +208,8 @@ This project is developed by Adham Banishamsah. All rights reserved.
 For contributions or questions, please contact:
 - **Website**: [www.adham.no](https://www.adham.no)
 - **App Site**: [pottytime.adham-tech.com](https://pottytime.adham-tech.com)
+
+You can also access developer information directly from the app's Settings → About Potty Pal section.
 
 ## 📞 Support
 

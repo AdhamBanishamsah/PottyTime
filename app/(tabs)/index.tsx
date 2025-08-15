@@ -1,8 +1,9 @@
 import { Colors } from '@/constants/Colors';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { soundManager } from '@/utils/sound';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -37,17 +38,29 @@ export default function HomeScreen() {
   const [smallPottyCount, setSmallPottyCount] = useState(0);
   const [bigPottyCount, setBigPottyCount] = useState(0);
 
+  // Load sounds when component mounts
+  useEffect(() => {
+    soundManager.loadSounds();
+    
+    // Cleanup sounds when component unmounts
+    return () => {
+      soundManager.unloadSounds();
+    };
+  }, []);
+
   const handleBuddySelect = (buddy: PottyBuddy) => {
     setSelectedBuddy(buddy);
   };
 
-  const handleSmallPotty = () => {
+  const handleSmallPotty = async () => {
     setSmallPottyCount(prev => prev + 1);
+    await soundManager.playSmallPottySound();
     Alert.alert(t('greatJob') + ' 🎉', 'You did it! Keep up the good work!', [{ text: 'OK' }]);
   };
 
-  const handleBigPotty = () => {
+  const handleBigPotty = async () => {
     setBigPottyCount(prev => prev + 1);
+    await soundManager.playBigPottySound();
     Alert.alert('Amazing! 🌟', t('bigKidMessage'), [{ text: 'OK' }]);
   };
 

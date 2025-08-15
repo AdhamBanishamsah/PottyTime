@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Animated, Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
@@ -13,15 +13,19 @@ export default function LoadingScreen() {
   const { t } = useLanguage();
   const colorScheme = useColorScheme();
   
+  console.log('Loading screen rendered!');
+  
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoRotation = useRef(new Animated.Value(0)).current;
+  const logoBounce = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const bounceValue = useRef(new Animated.Value(0)).current;
+  const starRotation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Start animations
     const startAnimations = () => {
-      // Logo scale and rotation animation
+      // Logo scale and bounce animation
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
@@ -31,19 +35,35 @@ export default function LoadingScreen() {
         }),
         Animated.loop(
           Animated.sequence([
-            Animated.timing(logoRotation, {
+            Animated.timing(logoBounce, {
               toValue: 1,
-              duration: 2000,
+              duration: 1500,
               useNativeDriver: true,
             }),
-            Animated.timing(logoRotation, {
+            Animated.timing(logoBounce, {
               toValue: 0,
-              duration: 2000,
+              duration: 1500,
               useNativeDriver: true,
             }),
           ])
         ),
       ]).start();
+
+      // Logo rotation animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(logoRotation, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(logoRotation, {
+            toValue: 0,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
 
       // Text fade in
       Animated.timing(textOpacity, {
@@ -68,6 +88,15 @@ export default function LoadingScreen() {
           }),
         ])
       ).start();
+
+      // Star rotation animation
+      Animated.loop(
+        Animated.timing(starRotation, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        })
+      ).start();
     };
 
     startAnimations();
@@ -78,7 +107,7 @@ export default function LoadingScreen() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router, logoScale, logoRotation, textOpacity, bounceValue]);
+  }, [router, logoScale, logoRotation, logoBounce, textOpacity, bounceValue, starRotation]);
 
   const spin = logoRotation.interpolate({
     inputRange: [0, 1],
@@ -88,6 +117,16 @@ export default function LoadingScreen() {
   const bounce = bounceValue.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -20],
+  });
+
+  const logoBounceY = logoBounce.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -15],
+  });
+
+  const starSpin = starRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
   });
 
   return (
@@ -100,12 +139,41 @@ export default function LoadingScreen() {
             {
               transform: [
                 { scale: logoScale },
-                { rotate: spin },
+                { translateY: logoBounceY },
               ],
             },
           ]}
         >
-          <Text style={styles.logoEmoji}>🚽</Text>
+          <Image 
+            source={require('../assets/images/AppIcons/appstore.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+            onError={(error) => console.log('Logo loading error:', error)}
+            onLoad={() => console.log('Logo loaded successfully!')}
+          />
+          
+          {/* Rotating Stars */}
+          <Animated.View
+            style={[
+              styles.starLeft,
+              {
+                transform: [{ rotate: starSpin }],
+              },
+            ]}
+          >
+            <Text style={styles.starEmoji}>⭐</Text>
+          </Animated.View>
+          
+          <Animated.View
+            style={[
+              styles.starRight,
+              {
+                transform: [{ rotate: starSpin }],
+              },
+            ]}
+          >
+            <Text style={styles.starEmoji}>⭐</Text>
+          </Animated.View>
         </Animated.View>
 
         {/* Bouncing Potty Buddies */}
@@ -209,9 +277,26 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginBottom: 40,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  logoEmoji: {
-    fontSize: 120,
+  logoImage: {
+    width: 200,
+    height: 200,
+  },
+  starLeft: {
+    position: 'absolute',
+    left: -30,
+    top: 20,
+  },
+  starRight: {
+    position: 'absolute',
+    right: -30,
+    top: 20,
+  },
+  starEmoji: {
+    fontSize: 30,
   },
   buddiesContainer: {
     flexDirection: 'row',

@@ -1,10 +1,14 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
     Alert,
+    Linking,
+    Modal,
     ScrollView,
     StyleSheet,
     Switch,
@@ -13,7 +17,6 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Language {
   code: string;
@@ -30,8 +33,10 @@ const languages: Language[] = [
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const { t, currentLanguage, changeLanguage } = useLanguage();
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   const handleLanguageChange = async (languageCode: string) => {
     await changeLanguage(languageCode);
@@ -44,6 +49,14 @@ export default function SettingsScreen() {
 
   const handleRemindersToggle = (value: boolean) => {
     setRemindersEnabled(value);
+  };
+
+  const handleAboutPress = () => {
+    setShowAboutModal(true);
+  };
+
+  const handleOpenWebsite = (url: string) => {
+    Linking.openURL(url);
   };
 
   const SettingItem = ({ 
@@ -173,7 +186,9 @@ export default function SettingsScreen() {
             icon="info.circle.fill"
             title={t('aboutPottyPal')}
             subtitle="Learn more about the app"
+            onPress={handleAboutPress}
           />
+
           <View style={styles.versionItem}>
             <View style={styles.settingLeft}>
               <View style={[styles.iconContainer, { backgroundColor: Colors[colorScheme ?? 'light'].tint + '20' }]}>
@@ -198,6 +213,82 @@ export default function SettingsScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* About Modal */}
+      <Modal
+        visible={showAboutModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAboutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>About Potty Pal</Text>
+              <TouchableOpacity
+                onPress={() => setShowAboutModal(false)}
+                style={styles.closeButton}
+              >
+                <IconSymbol name="xmark.circle.fill" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>🚽 Potty Pal</Text>
+                <Text style={styles.aboutDescription}>
+                  A fun and engaging potty training app designed to help children learn and track their potty habits with the help of friendly animal buddies!
+                </Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>👨‍💻 Developer</Text>
+                <Text style={styles.aboutDescription}>
+                  <Text style={styles.boldText}>Adham Banishamsah</Text>
+                </Text>
+                <TouchableOpacity
+                  style={styles.linkItem}
+                  onPress={() => handleOpenWebsite('https://www.adham.no')}
+                >
+                  <IconSymbol name="globe" size={16} color="#007AFF" />
+                  <Text style={styles.linkText}>www.adham.no</Text>
+                  <IconSymbol name="arrow.up.right" size={12} color="#007AFF" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.linkItem}
+                  onPress={() => handleOpenWebsite('https://pottytime.adham-tech.com')}
+                >
+                  <IconSymbol name="app.badge" size={16} color="#007AFF" />
+                  <Text style={styles.linkText}>pottytime.adham-tech.com</Text>
+                  <IconSymbol name="arrow.up.right" size={12} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>✨ Features</Text>
+                <Text style={styles.featureItem}>• Choose your potty buddy</Text>
+                <Text style={styles.featureItem}>• Track potty progress</Text>
+                <Text style={styles.featureItem}>• Smart reminders</Text>
+                <Text style={styles.featureItem}>• Rewards and achievements</Text>
+                <Text style={styles.featureItem}>• Multi-language support</Text>
+                <Text style={styles.featureItem}>• Fun animations</Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>🌍 Languages</Text>
+                <Text style={styles.featureItem}>• English</Text>
+                <Text style={styles.featureItem}>• Arabic</Text>
+                <Text style={styles.featureItem}>• Norwegian</Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>📱 Version</Text>
+                <Text style={styles.aboutDescription}>{t('version')}</Text>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -332,5 +423,85 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     opacity: 0.7,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  aboutSection: {
+    marginBottom: 25,
+  },
+  aboutTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  aboutDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#666',
+    marginBottom: 10,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  linkItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  linkText: {
+    fontSize: 16,
+    color: '#007AFF',
+    marginLeft: 8,
+    marginRight: 8,
+    flex: 1,
+  },
+  featureItem: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#666',
+    marginBottom: 5,
   },
 });
