@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { soundManager } from '@/utils/sound';
@@ -34,9 +35,8 @@ const pottyBuddies: PottyBuddy[] = [
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const { t } = useLanguage();
+  const { appState, updateSmallPottyCount, updateBigPottyCount, unlockAchievement, updateDailyProgress } = useApp();
   const [selectedBuddy, setSelectedBuddy] = useState<PottyBuddy>(pottyBuddies[0]);
-  const [smallPottyCount, setSmallPottyCount] = useState(0);
-  const [bigPottyCount, setBigPottyCount] = useState(0);
 
   // Load sounds when component mounts
   useEffect(() => {
@@ -53,14 +53,46 @@ export default function HomeScreen() {
   };
 
   const handleSmallPotty = async () => {
-    setSmallPottyCount(prev => prev + 1);
+    const newCount = appState.smallPottyCount + 1;
+    updateSmallPottyCount(newCount);
+    
+    // Update daily progress
+    const today = new Date().toISOString().split('T')[0];
+    const todayProgress = appState.weeklyProgress[today] || { smallPotty: 0, bigPotty: 0, success: false };
+    updateDailyProgress(today, todayProgress.smallPotty + 1, todayProgress.bigPotty);
+    
     await soundManager.playSmallPottySound();
+    
+    // Check for achievements
+    if (newCount === 1) {
+      unlockAchievement('potty-rookie');
+    }
+    if (newCount === 5) {
+      unlockAchievement('high-five-hero');
+    }
+    if (newCount === 5) {
+      unlockAchievement('pee-pro');
+    }
+    
     Alert.alert(t('greatJob') + ' 🎉', 'You did it! Keep up the good work!', [{ text: 'OK' }]);
   };
 
   const handleBigPotty = async () => {
-    setBigPottyCount(prev => prev + 1);
+    const newCount = appState.bigPottyCount + 1;
+    updateBigPottyCount(newCount);
+    
+    // Update daily progress
+    const today = new Date().toISOString().split('T')[0];
+    const todayProgress = appState.weeklyProgress[today] || { smallPotty: 0, bigPotty: 0, success: false };
+    updateDailyProgress(today, todayProgress.smallPotty, todayProgress.bigPotty + 1);
+    
     await soundManager.playBigPottySound();
+    
+    // Check for achievements
+    if (newCount === 3) {
+      unlockAchievement('poop-pal');
+    }
+    
     Alert.alert('Amazing! 🌟', t('bigKidMessage'), [{ text: 'OK' }]);
   };
 
@@ -71,8 +103,8 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header with gradient background */}
         <View style={styles.header}>
-          <Text style={styles.appTitle}>PeePee Hero</Text>
-          <Text style={styles.appSubtitle}>Let's make potty time fun! 🐦</Text>
+          <Text style={styles.appTitle}>{t('appTitle')}</Text>
+          <Text style={styles.appSubtitle}>Let's make potty time fun! 🚽</Text>
         </View>
 
         {/* Choose Your Potty Buddy Section */}

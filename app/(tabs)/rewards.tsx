@@ -1,16 +1,18 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,6 +23,7 @@ interface Reward {
   title: string;
   description: string;
   emoji: string;
+  image?: any;
   unlocked: boolean;
   progress: number;
   maxProgress: number;
@@ -30,70 +33,182 @@ interface Reward {
 export default function RewardsScreen() {
   const colorScheme = useColorScheme();
   const { t } = useLanguage();
+  const { appState } = useApp();
   const [selectedReward, setSelectedReward] = useState<string | null>(null);
 
-  const rewards: Reward[] = [
+  const getRewards = (): Reward[] => {
+    const totalPottyCount = appState.smallPottyCount + appState.bigPottyCount;
+    
+    return [
+          {
+        id: 'potty-rookie',
+        title: t('pottyRookie'),
+        description: t('pottyRookieDesc'),
+        emoji: '🐣',
+        image: require('../../assets/images/Potty_Rookie.png'),
+        unlocked: appState.achievements.includes('potty-rookie'),
+        progress: appState.smallPottyCount > 0 ? 1 : 0,
+        maxProgress: 1,
+        color: '#FFD700',
+      },
+          {
+        id: 'high-five-hero',
+        title: t('highFiveHero'),
+        description: t('highFiveHeroDesc'),
+        emoji: '🖐️',
+        image: require('../../assets/images/High-Five_Hero.png'),
+        unlocked: appState.achievements.includes('high-five-hero'),
+        progress: Math.min(appState.smallPottyCount, 5),
+        maxProgress: 5,
+        color: '#FF6B6B',
+      },
+          {
+        id: 'star-sitter',
+        title: t('starSitter'),
+        description: t('starSitterDesc'),
+        emoji: '⭐',
+        image: require('../../assets/images/Star_Sitter.png'),
+        unlocked: appState.achievements.includes('star-sitter'),
+        progress: Math.min(totalPottyCount, 10),
+        maxProgress: 10,
+        color: '#4ECDC4',
+      },
+          {
+        id: 'pee-pro',
+        title: t('peePro'),
+        description: t('peeProDesc'),
+        emoji: '💧',
+        image: require('../../assets/images/Pee_Pro.png'),
+        unlocked: appState.achievements.includes('pee-pro'),
+        progress: Math.min(appState.smallPottyCount, 5),
+        maxProgress: 5,
+        color: '#45B7D1',
+      },
+          {
+        id: 'poop-pal',
+        title: t('poopPal'),
+        description: t('poopPalDesc'),
+        emoji: '💩',
+        image: require('../../assets/images/Poop_Pal.png'),
+        unlocked: appState.achievements.includes('poop-pal'),
+        progress: Math.min(appState.bigPottyCount, 3),
+        maxProgress: 3,
+        color: '#96CEB4',
+      },
     {
-      id: 'first-try',
-      title: t('firstTry'),
-      description: t('firstTryDesc'),
-      emoji: '🎉',
-      unlocked: true,
-      progress: 1,
-      maxProgress: 1,
-      color: '#FFD700',
-    },
-    {
-      id: 'high-five',
-      title: t('highFive'),
-      description: t('highFiveDesc'),
-      emoji: '🖐️',
-      unlocked: true,
-      progress: 5,
-      maxProgress: 5,
-      color: '#FF6B6B',
-    },
-    {
-      id: 'perfect-ten',
-      title: t('perfectTen'),
-      description: t('perfectTenDesc'),
-      emoji: '⭐',
-      unlocked: false,
-      progress: 7,
-      maxProgress: 10,
-      color: '#4ECDC4',
-    },
-    {
-      id: 'pee-expert',
-      title: t('peeExpert'),
-      description: t('peeExpertDesc'),
-      emoji: '💧',
-      unlocked: true,
-      progress: 5,
-      maxProgress: 5,
-      color: '#45B7D1',
-    },
-    {
-      id: 'poop-champion',
-      title: t('poopChampion'),
-      description: t('poopChampionDesc'),
-      emoji: '💩',
-      unlocked: false,
-      progress: 2,
-      maxProgress: 3,
-      color: '#96CEB4',
-    },
-    {
-      id: 'week-warrior',
-      title: t('weekWarrior'),
-      description: t('weekWarriorDesc'),
+      id: 'daily-champ',
+      title: t('dailyChamp'),
+      description: t('dailyChampDesc'),
       emoji: '🏆',
-      unlocked: false,
-      progress: 4,
+      image: require('../../assets/images/Potty_Party.png'), // Using Potty Party image for Daily Champ
+      unlocked: appState.achievements.includes('daily-champ'),
+      progress: Math.min(totalPottyCount, 7),
       maxProgress: 7,
       color: '#FFA07A',
     },
-  ];
+    {
+      id: 'magical-potty-power',
+      title: t('magicalPottyPower'),
+      description: t('magicalPottyPowerDesc'),
+      emoji: '🦄',
+      image: require('../../assets/images/Magical_Potty_Power.png'), // Using Potty Party image for Magical Potty Power
+      unlocked: appState.achievements.includes('magical-potty-power'),
+      progress: 1,
+      maxProgress: 2,
+      color: '#DDA0DD',
+    },
+    {
+      id: 'slow-and-steady',
+      title: t('slowAndSteady'),
+      description: t('slowAndSteadyDesc'),
+      emoji: '🐢',
+      image: require('../../assets/images/Slow_and_Steady.png'),
+      unlocked: appState.achievements.includes('slow-and-steady'),
+      progress: 1,
+      maxProgress: 1,
+      color: '#98FB98',
+    },
+    {
+      id: 'quick-bunny',
+      title: t('quickBunny'),
+      description: t('quickBunnyDesc'),
+      emoji: '🐰',
+      image: require('../../assets/images/Quick_Bunny.png'),
+      unlocked: appState.achievements.includes('quick-bunny'),
+      progress: 0,
+      maxProgress: 1,
+      color: '#F0E68C',
+    },
+    {
+      id: 'potty-party',
+      title: t('pottyParty'),
+      description: t('pottyPartyDesc'),
+      emoji: '🎈',
+      image: require('../../assets/images/Potty_Party.png'),
+      unlocked: appState.achievements.includes('potty-party'),
+      progress: Math.min(totalPottyCount, 10),
+      maxProgress: 10,
+      color: '#FFB6C1',
+    },
+    {
+      id: 'super-wiper',
+      title: t('superWiper'),
+      description: t('superWiperDesc'),
+      emoji: '🦸',
+      image: require('../../assets/images/Super_Wiper.png'),
+      unlocked: appState.achievements.includes('super-wiper'),
+      progress: 0,
+      maxProgress: 1,
+      color: '#87CEEB',
+    },
+    {
+      id: 'flushy-fish',
+      title: t('flushyFish'),
+      description: t('flushyFishDesc'),
+      emoji: '🐠',
+      image: require('../../assets/images/Flushy_fish.png'), // Using Potty Party image for Flushy Fish
+      unlocked: appState.achievements.includes('flushy-fish'),
+      progress: 0,
+      maxProgress: 1,
+      color: '#20B2AA',
+    },
+    {
+      id: 'big-kid-badge',
+      title: t('bigKidBadge'),
+      description: t('bigKidBadgeDesc'),
+      emoji: '🌟',
+      image: require('../../assets/images/Star_Sitter.png'), // Using Star Sitter image for Big Kid Badge
+      unlocked: appState.achievements.includes('big-kid-badge'),
+      progress: Math.min(totalPottyCount, 10),
+      maxProgress: 10,
+      color: '#FFD700',
+    },
+    {
+      id: 'cheeky-chimp',
+      title: t('cheekyChimp'),
+      description: t('cheekyChimpDesc'),
+      emoji: '🐵',
+      image: require('../../assets/images/Cheeky_Chimp.png'),
+      unlocked: appState.achievements.includes('cheeky-chimp'),
+      progress: 1,
+      maxProgress: 1,
+      color: '#DEB887',
+    },
+          {
+        id: 'potty-streak-star',
+        title: t('pottyStreakStar'),
+        description: t('pottyStreakStarDesc'),
+        emoji: '🎉',
+        image: require('../../assets/images/Potty_Streak_Star.png'),
+        unlocked: appState.achievements.includes('potty-streak-star'),
+        progress: 1,
+        maxProgress: 3,
+        color: '#FF69B4',
+      },
+    ];
+  };
+
+  const rewards = getRewards();
 
   const totalUnlocked = rewards.filter(reward => reward.unlocked).length;
   const totalRewards = rewards.length;
@@ -153,7 +268,7 @@ export default function RewardsScreen() {
         {/* Rewards Grid */}
         <View style={styles.rewardsSection}>
           <Text style={[styles.sectionTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
-            Your Achievements
+            Your Achievement Badges
           </Text>
           
           <View style={styles.rewardsGrid}>
@@ -168,7 +283,15 @@ export default function RewardsScreen() {
                 onPress={() => setSelectedReward(reward.id)}
               >
                 <View style={[styles.rewardIcon, { backgroundColor: reward.color + '20' }]}>
-                  <Text style={styles.rewardEmoji}>{reward.emoji}</Text>
+                  {reward.image ? (
+                    <Image 
+                      source={reward.image} 
+                      style={styles.rewardImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={styles.rewardEmoji}>{reward.emoji}</Text>
+                  )}
                   {reward.unlocked && (
                     <View style={styles.unlockBadge}>
                       <IconSymbol name="checkmark.circle.fill" size={16} color="#34C759" />
@@ -297,8 +420,8 @@ const styles = StyleSheet.create({
   rewardCard: {
     backgroundColor: 'white',
     borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
+    padding: 12,
+    marginBottom: 12,
     width: (width - 60) / 2,
     alignItems: 'center',
     shadowColor: '#000',
@@ -319,16 +442,20 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.tint,
   },
   rewardIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
     position: 'relative',
   },
   rewardEmoji: {
-    fontSize: 30,
+    fontSize: 25,
+  },
+  rewardImage: {
+    width: 60,
+    height: 60,
   },
   unlockBadge: {
     position: 'absolute',
@@ -338,16 +465,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   rewardTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   rewardDescription: {
-    fontSize: 11,
+    fontSize: 10,
     opacity: 0.7,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   progressContainer: {
     width: '100%',

@@ -1,4 +1,7 @@
 export interface TranslationKeys {
+  // App Title
+  appTitle: string;
+  
   // Navigation
   home: string;
   reminders: string;
@@ -30,6 +33,44 @@ export interface TranslationKeys {
   version: string;
   madeWithLove: string;
   languageChanged: string;
+  pushNotifications: string;
+  pushNotificationsDesc: string;
+  dailyReminders: string;
+  dailyRemindersDesc: string;
+  appInformation: string;
+  learnMoreAboutApp: string;
+  advancedOptions: string;
+  versionLabel: string;
+  aboutPottyPalTitle: string;
+  pottyPalDescription: string;
+  developer: string;
+  features: string;
+  choosePottyBuddy: string;
+  trackPottyProgress: string;
+  smartReminders: string;
+  rewardsAndAchievements: string;
+  multiLanguageSupport: string;
+  funAnimations: string;
+  languages: string;
+  english: string;
+  arabic: string;
+  norwegian: string;
+  resetApp: string;
+  resetAppDesc: string;
+  resetConfirmTitle: string;
+  resetConfirmMessage: string;
+  resetCancel: string;
+  resetConfirm: string;
+  resetSuccess: string;
+  resetPuzzleTitle: string;
+  resetPuzzleMessage: string;
+  resetPuzzleQuestion: string;
+  resetPuzzlePlaceholder: string;
+  resetPuzzleSubmit: string;
+  resetPuzzleIncorrect: string;
+  resetPuzzleCorrect: string;
+  tryAgain: string;
+  cancel: string;
 
   // Reminders Screen
   todaysSchedule: string;
@@ -64,18 +105,39 @@ export interface TranslationKeys {
   nextReward: string;
   progressLabel: string;
   unlocked: string;
-  firstTry: string;
-  firstTryDesc: string;
-  highFive: string;
-  highFiveDesc: string;
-  perfectTen: string;
-  perfectTenDesc: string;
-  peeExpert: string;
-  peeExpertDesc: string;
-  poopChampion: string;
-  poopChampionDesc: string;
-  weekWarrior: string;
-  weekWarriorDesc: string;
+  
+  // Kid-friendly Achievements
+  pottyRookie: string;
+  pottyRookieDesc: string;
+  highFiveHero: string;
+  highFiveHeroDesc: string;
+  starSitter: string;
+  starSitterDesc: string;
+  peePro: string;
+  peeProDesc: string;
+  poopPal: string;
+  poopPalDesc: string;
+  dailyChamp: string;
+  dailyChampDesc: string;
+  magicalPottyPower: string;
+  magicalPottyPowerDesc: string;
+  slowAndSteady: string;
+  slowAndSteadyDesc: string;
+  quickBunny: string;
+  quickBunnyDesc: string;
+  pottyParty: string;
+  pottyPartyDesc: string;
+  superWiper: string;
+  superWiperDesc: string;
+  flushyFish: string;
+  flushyFishDesc: string;
+  bigKidBadge: string;
+  bigKidBadgeDesc: string;
+  cheekyChimp: string;
+  cheekyChimpDesc: string;
+  pottyStreakStar: string;
+  pottyStreakStarDesc: string;
+  
   amazingJob: string;
   earnedRewardMessage: string;
 

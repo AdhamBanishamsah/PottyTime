@@ -1,20 +1,22 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Linking,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Linking,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,21 +24,27 @@ interface Language {
   code: string;
   name: string;
   nativeName: string;
+  flag: string;
 }
 
 const languages: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English' },
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
-  { code: 'no', name: 'Norwegian', nativeName: 'Norsk' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  { code: 'no', name: 'Norwegian', nativeName: 'Norsk', flag: '🇳🇴' },
 ];
 
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const { t, currentLanguage, changeLanguage } = useLanguage();
+  const { resetApp } = useApp();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showResetPuzzle, setShowResetPuzzle] = useState(false);
+  const [puzzleAnswer, setPuzzleAnswer] = useState('');
+  const [puzzleQuestion, setPuzzleQuestion] = useState('');
+  const [puzzleCorrectAnswer, setPuzzleCorrectAnswer] = useState('');
 
   const handleLanguageChange = async (languageCode: string) => {
     await changeLanguage(languageCode);
@@ -59,6 +67,66 @@ export default function SettingsScreen() {
     Linking.openURL(url);
   };
 
+  const generatePuzzle = () => {
+    const operations = [
+      { op: '+', func: (a: number, b: number) => a + b },
+      { op: '-', func: (a: number, b: number) => a - b },
+      { op: '×', func: (a: number, b: number) => a * b },
+    ];
+    
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    const num1 = Math.floor(Math.random() * 10) + 1; // 1-10
+    const num2 = Math.floor(Math.random() * 10) + 1; // 1-10
+    
+    // Ensure positive result for subtraction
+    if (operation.op === '-') {
+      const max = Math.max(num1, num2);
+      const min = Math.min(num1, num2);
+      const question = `${max} ${operation.op} ${min}`;
+      const answer = operation.func(max, min);
+      setPuzzleQuestion(question);
+      setPuzzleCorrectAnswer(answer.toString());
+    } else {
+      const question = `${num1} ${operation.op} ${num2}`;
+      const answer = operation.func(num1, num2);
+      setPuzzleQuestion(question);
+      setPuzzleCorrectAnswer(answer.toString());
+    }
+  };
+
+  const handleResetApp = () => {
+    generatePuzzle();
+    setShowResetPuzzle(true);
+  };
+
+  const handlePuzzleSubmit = async () => {
+    if (puzzleAnswer.trim() === puzzleCorrectAnswer) {
+      setShowResetPuzzle(false);
+      setPuzzleAnswer('');
+      Alert.alert(t('resetPuzzleCorrect'), '', [
+        {
+          text: 'OK',
+          onPress: async () => {
+            try {
+              await resetApp();
+              Alert.alert('Success', t('resetSuccess'));
+            } catch (error) {
+              Alert.alert('Error', 'Failed to reset app. Please try again.');
+            }
+          },
+        },
+      ]);
+    } else {
+      Alert.alert('Incorrect', t('resetPuzzleIncorrect'), [
+        { text: t('tryAgain'), onPress: () => {
+          generatePuzzle();
+          setPuzzleAnswer('');
+        }},
+        { text: t('cancel'), style: 'cancel' }
+      ]);
+    }
+  };
+
   const SettingItem = ({ 
     icon, 
     title, 
@@ -68,7 +136,7 @@ export default function SettingsScreen() {
     switchValue = false, 
     onSwitchChange 
   }: {
-    icon: string;
+    icon: any;
     title: string;
     subtitle?: string;
     onPress?: () => void;
@@ -140,12 +208,17 @@ export default function SettingsScreen() {
               onPress={() => handleLanguageChange(language.code)}
             >
               <View style={styles.languageInfo}>
-                <Text style={[styles.languageName, { color: Colors[colorScheme ?? 'light'].text }]}>
-                  {language.name}
+                <Text style={styles.languageFlag}>
+                  {language.flag}
                 </Text>
-                <Text style={[styles.languageNative, { color: Colors[colorScheme ?? 'light'].text }]}>
-                  {language.nativeName}
-                </Text>
+                <View style={styles.languageText}>
+                  <Text style={[styles.languageName, { color: Colors[colorScheme ?? 'light'].text }]}>
+                    {language.name}
+                  </Text>
+                  <Text style={[styles.languageNative, { color: Colors[colorScheme ?? 'light'].text }]}>
+                    {language.nativeName}
+                  </Text>
+                </View>
               </View>
               {currentLanguage === language.code && (
                 <IconSymbol name="checkmark.circle.fill" size={20} color={Colors[colorScheme ?? 'light'].tint} />
@@ -161,16 +234,16 @@ export default function SettingsScreen() {
           </Text>
           <SettingItem
             icon="bell.fill"
-            title={t('notifications')}
-            subtitle="Get reminders and updates"
+            title={t('pushNotifications')}
+            subtitle={t('pushNotificationsDesc')}
             showSwitch={true}
             switchValue={notificationsEnabled}
             onSwitchChange={handleNotificationToggle}
           />
           <SettingItem
             icon="clock.fill"
-            title={t('enableReminders')}
-            subtitle="Daily potty reminders"
+            title={t('dailyReminders')}
+            subtitle={t('dailyRemindersDesc')}
             showSwitch={true}
             switchValue={remindersEnabled}
             onSwitchChange={handleRemindersToggle}
@@ -180,13 +253,28 @@ export default function SettingsScreen() {
         {/* About Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
-            About
+            {t('appInformation')}
           </Text>
           <SettingItem
             icon="info.circle.fill"
             title={t('aboutPottyPal')}
-            subtitle="Learn more about the app"
+            subtitle={t('learnMoreAboutApp')}
             onPress={handleAboutPress}
+          />
+
+        </View>
+
+        {/* Advanced Options Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
+            {t('advancedOptions')}
+          </Text>
+
+          <SettingItem
+            icon="arrow.clockwise"
+            title={t('resetApp')}
+            subtitle={t('resetAppDesc')}
+            onPress={handleResetApp}
           />
 
           <View style={styles.versionItem}>
@@ -196,7 +284,7 @@ export default function SettingsScreen() {
               </View>
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
-                  Version
+                  {t('versionLabel')}
                 </Text>
                 <Text style={[styles.settingSubtitle, { color: Colors[colorScheme ?? 'light'].text }]}>
                   {t('version')}
@@ -224,7 +312,7 @@ export default function SettingsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>About Potty Pal</Text>
+              <Text style={styles.modalTitle}>{t('aboutPottyPalTitle')}</Text>
               <TouchableOpacity
                 onPress={() => setShowAboutModal(false)}
                 style={styles.closeButton}
@@ -237,12 +325,12 @@ export default function SettingsScreen() {
               <View style={styles.aboutSection}>
                 <Text style={styles.aboutTitle}>🚽 Potty Pal</Text>
                 <Text style={styles.aboutDescription}>
-                  A fun and engaging potty training app designed to help children learn and track their potty habits with the help of friendly animal buddies!
+                  {t('pottyPalDescription')}
                 </Text>
               </View>
 
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutTitle}>👨‍💻 Developer</Text>
+                <Text style={styles.aboutTitle}>👨‍💻 {t('developer')}</Text>
                 <Text style={styles.aboutDescription}>
                   <Text style={styles.boldText}>Adham Banishamsah</Text>
                 </Text>
@@ -265,20 +353,20 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutTitle}>✨ Features</Text>
-                <Text style={styles.featureItem}>• Choose your potty buddy</Text>
-                <Text style={styles.featureItem}>• Track potty progress</Text>
-                <Text style={styles.featureItem}>• Smart reminders</Text>
-                <Text style={styles.featureItem}>• Rewards and achievements</Text>
-                <Text style={styles.featureItem}>• Multi-language support</Text>
-                <Text style={styles.featureItem}>• Fun animations</Text>
+                <Text style={styles.aboutTitle}>✨ {t('features')}</Text>
+                <Text style={styles.featureItem}>• {t('choosePottyBuddy')}</Text>
+                <Text style={styles.featureItem}>• {t('trackPottyProgress')}</Text>
+                <Text style={styles.featureItem}>• {t('smartReminders')}</Text>
+                <Text style={styles.featureItem}>• {t('rewardsAndAchievements')}</Text>
+                <Text style={styles.featureItem}>• {t('multiLanguageSupport')}</Text>
+                <Text style={styles.featureItem}>• {t('funAnimations')}</Text>
               </View>
 
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutTitle}>🌍 Languages</Text>
-                <Text style={styles.featureItem}>• English</Text>
-                <Text style={styles.featureItem}>• Arabic</Text>
-                <Text style={styles.featureItem}>• Norwegian</Text>
+                <Text style={styles.aboutTitle}>🌍 {t('languages')}</Text>
+                <Text style={styles.featureItem}>• {t('english')}</Text>
+                <Text style={styles.featureItem}>• {t('arabic')}</Text>
+                <Text style={styles.featureItem}>• {t('norwegian')}</Text>
               </View>
 
               <View style={styles.aboutSection}>
@@ -286,6 +374,46 @@ export default function SettingsScreen() {
                 <Text style={styles.aboutDescription}>{t('version')}</Text>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Reset Puzzle Modal */}
+      <Modal
+        visible={showResetPuzzle}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowResetPuzzle(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t('resetPuzzleTitle')}</Text>
+              <TouchableOpacity
+                onPress={() => setShowResetPuzzle(false)}
+                style={styles.closeButton}
+              >
+                <IconSymbol name="xmark.circle.fill" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalBody}>
+              <Text style={styles.aboutDescription}>{t('resetPuzzleMessage')}</Text>
+              <Text style={styles.aboutTitle}>{puzzleQuestion}</Text>
+              <TextInput
+                style={styles.puzzleInput}
+                value={puzzleAnswer}
+                onChangeText={setPuzzleAnswer}
+                placeholder={t('resetPuzzlePlaceholder')}
+                keyboardType="numeric"
+                maxLength={2}
+              />
+              <TouchableOpacity
+                style={styles.puzzleSubmitButton}
+                onPress={handlePuzzleSubmit}
+              >
+                <Text style={styles.puzzleSubmitText}>{t('resetPuzzleSubmit')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -314,6 +442,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     paddingHorizontal: 20,
+    textAlign: 'center',
   },
   settingItem: {
     flexDirection: 'row',
@@ -385,6 +514,15 @@ const styles = StyleSheet.create({
   },
   languageInfo: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  languageFlag: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  languageText: {
+    flex: 1,
   },
   languageName: {
     fontSize: 16,
@@ -424,6 +562,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.7,
   },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -503,5 +642,27 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#666',
     marginBottom: 5,
+  },
+  puzzleInput: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginTop: 15,
+    marginBottom: 20,
+    backgroundColor: '#F8F8F8',
+  },
+  puzzleSubmitButton: {
+    backgroundColor: '#FF3B30',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  puzzleSubmitText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

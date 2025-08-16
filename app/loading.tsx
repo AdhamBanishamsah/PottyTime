@@ -145,7 +145,7 @@ export default function LoadingScreen() {
           ]}
         >
           <Image 
-            source={require('../assets/images/AppIcons/appstore.png')} 
+                          source={require('../assets/images/logo.png')} 
             style={styles.logoImage}
             resizeMode="contain"
             onError={(error) => console.log('Logo loading error:', error)}

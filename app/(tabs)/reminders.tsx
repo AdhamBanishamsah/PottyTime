@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { soundManager } from '@/utils/sound';
@@ -35,6 +36,7 @@ interface Reminder {
 export default function RemindersScreen() {
   const colorScheme = useColorScheme();
   const { t } = useLanguage();
+  const { appState, addCustomReminder, removeCustomReminder } = useApp();
   const [reminders, setReminders] = useState<Reminder[]>([]);
 
   // Load sounds when component mounts
@@ -97,7 +99,10 @@ export default function RemindersScreen() {
     
     setReminders(prev => {
       // Preserve custom reminders and update default ones
-      const customReminders = prev.filter(r => r.isCustom);
+      const customReminders = appState.customReminders.map((customReminder: any) => ({
+        ...customReminder,
+        isCustom: true,
+      }));
       return [...defaultReminders, ...customReminders];
     });
   }, [t]);
@@ -154,7 +159,7 @@ export default function RemindersScreen() {
       isCustom: true,
     };
 
-    setReminders(prev => [...prev, newReminder]);
+    addCustomReminder(newReminder);
     setNewReminderTitle('');
     setSelectedHour(8);
     setSelectedMinute(0);
@@ -172,7 +177,7 @@ export default function RemindersScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            setReminders(prev => prev.filter(reminder => reminder.id !== id));
+            removeCustomReminder(id);
           },
         },
       ]

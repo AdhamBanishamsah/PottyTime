@@ -41,6 +41,10 @@ const MAPPING = {
   'xmark.circle.fill': 'cancel',
   'globe': 'language',
   'arrow.up.right': 'open-in-new',
+  'info.circle.fill': 'info',
+  'checkmark.circle.fill': 'check-circle',
+  'app.badge': 'apps',
+  'arrow.clockwise': 'refresh',
 } as IconMapping;
 
 /**

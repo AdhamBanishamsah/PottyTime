@@ -1,5 +1,7 @@
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
+import { useApp } from '@/contexts/AppContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
@@ -11,7 +13,6 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -25,18 +26,32 @@ interface DayProgress {
 export default function ProgressScreen() {
   const colorScheme = useColorScheme();
   const { t } = useLanguage();
+  const { appState } = useApp();
   const [selectedWeek, setSelectedWeek] = useState(0);
 
-  // Mock data for progress
-  const weeklyProgress: DayProgress[] = [
-    { day: t('sun'), smallPotty: 2, bigPotty: 1, success: true },
-    { day: t('mon'), smallPotty: 3, bigPotty: 0, success: true },
-    { day: t('tue'), smallPotty: 1, bigPotty: 2, success: false },
-    { day: t('wed'), smallPotty: 4, bigPotty: 1, success: true },
-    { day: t('thu'), smallPotty: 2, bigPotty: 1, success: true },
-    { day: t('fri'), smallPotty: 3, bigPotty: 0, success: false },
-    { day: t('sat'), smallPotty: 1, bigPotty: 1, success: true },
-  ];
+  // Get current week's progress from app state
+  const getWeeklyProgress = (): DayProgress[] => {
+    const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    return days.map((dayKey, index) => {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + index);
+      const dateString = date.toISOString().split('T')[0];
+      const dayProgress = appState.weeklyProgress[dateString] || { smallPotty: 0, bigPotty: 0, success: false };
+      
+      return {
+        day: t(dayKey),
+        smallPotty: dayProgress.smallPotty,
+        bigPotty: dayProgress.bigPotty,
+        success: dayProgress.success,
+      };
+    });
+  };
+
+  const weeklyProgress = getWeeklyProgress();
 
   const totalSmallPotty = weeklyProgress.reduce((sum, day) => sum + day.smallPotty, 0);
   const totalBigPotty = weeklyProgress.reduce((sum, day) => sum + day.bigPotty, 0);
