@@ -4,7 +4,9 @@ import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { soundManager } from '@/utils/sound';
+import PrivacyModal from '../privacy';
 
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
@@ -89,12 +91,14 @@ export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const { t, currentLanguage, changeLanguage } = useLanguage();
   const { resetApp } = useApp();
+  const router = useRouter();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(soundManager.getMusicEnabled());
   const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume());
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showResetPuzzle, setShowResetPuzzle] = useState(false);
   const [puzzleAnswer, setPuzzleAnswer] = useState('');
   const [puzzleQuestion, setPuzzleQuestion] = useState('');
@@ -358,6 +362,12 @@ export default function SettingsScreen() {
             subtitle={t('learnMoreAboutApp')}
             onPress={handleAboutPress}
           />
+          <SettingItem
+            icon="hand.raised.fill"
+            title={t('privacyPolicy')}
+            subtitle="Read our privacy policy"
+            onPress={() => setShowPrivacyModal(true)}
+          />
 
         </View>
 
@@ -420,7 +430,7 @@ export default function SettingsScreen() {
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutTitle}>🚽 Potty Pal</Text>
+                <Text style={styles.aboutTitle}>🚽 Potty Time</Text>
                 <Text style={styles.aboutDescription}>
                   {t('pottyPalDescription')}
                 </Text>
@@ -514,6 +524,12 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Privacy Modal */}
+      <PrivacyModal
+        visible={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
     </SafeAreaView>
   );
 }

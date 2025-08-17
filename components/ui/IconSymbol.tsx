@@ -50,6 +50,9 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'music.note': 'music-note',
   'speaker.wave.2.fill': 'volume-up',
+  'hand.raised.fill': 'pan-tool',
+  'chevron.left': 'chevron-left',
+  'envelope.fill': 'email',
 } as IconMapping;
 
 /**

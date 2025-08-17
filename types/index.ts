@@ -157,4 +157,34 @@ export interface TranslationKeys {
   // Loading Screen
   loadingTitle: string;
   loadingSubtitle: string;
+
+  // Privacy Policy
+  privacyPolicy: string;
+  privacyIntroduction: string;
+  privacyIntroductionText: string;
+  informationWeCollect: string;
+  informationWeCollectText: string;
+  localDataStorage: string;
+  appUsageData: string;
+  deviceInformation: string;
+  howWeUseInformation: string;
+  howWeUseInformationText: string;
+  provideAppFeatures: string;
+  improveUserExperience: string;
+  trackProgress: string;
+  dataSecurity: string;
+  dataSecurityText: string;
+  childrensPrivacy: string;
+  childrensPrivacyText: string;
+  thirdPartyServices: string;
+  thirdPartyServicesText: string;
+  yourRights: string;
+  yourRightsText: string;
+  accessYourData: string;
+  deleteYourData: string;
+  contactUs: string;
+  emailUs: string;
+  visitWebsite: string;
+  lastUpdated: string;
+  lastUpdatedDate: string;
 }
