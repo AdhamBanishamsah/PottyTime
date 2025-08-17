@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
   weeklySection: {
     paddingHorizontal: 20,
     marginBottom: 30,
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 20,
@@ -235,11 +236,12 @@ const styles = StyleSheet.create({
   weekGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 4,
   },
   dayCard: {
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 15,
+    padding: 8,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {
@@ -249,23 +251,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    minWidth: (width - 60) / 7,
+    flex: 1,
+    marginHorizontal: 1,
   },
   dayLabel: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   dayStatus: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   dayCount: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
   },
   encouragementCard: {

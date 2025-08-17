@@ -45,6 +45,11 @@ const MAPPING = {
   'checkmark.circle.fill': 'check-circle',
   'app.badge': 'apps',
   'arrow.clockwise': 'refresh',
+  'chart.bar.fill': 'bar-chart',
+  'trophy.fill': 'emoji-events',
+  'gearshape.fill': 'settings',
+  'music.note': 'music-note',
+  'speaker.wave.2.fill': 'volume-up',
 } as IconMapping;
 
 /**

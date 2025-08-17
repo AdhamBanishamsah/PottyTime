@@ -1,27 +1,26 @@
 import { Audio } from 'expo-av';
 
 class SoundManager {
-  private smallPottySound: Audio.Sound | null = null;
-  private bigPottySound: Audio.Sound | null = null;
+  private backgroundMusic: Audio.Sound | null = null;
   private reminderSound: Audio.Sound | null = null;
+  private isMusicEnabled: boolean = true;
+  private musicVolume: number = 0.5;
 
   async loadSounds() {
     try {
       console.log('Loading sounds...');
       
-      // Load small potty sound
-      const { sound: smallSound } = await Audio.Sound.createAsync(
-        require('../assets/Audio/small_potty_effect.mp3')
+      // Load background music
+      const { sound: bgMusic } = await Audio.Sound.createAsync(
+        require('../assets/Audio/Sitting On The Potty.mp3'),
+        { 
+          shouldPlay: false,
+          isLooping: true,
+          volume: this.musicVolume
+        }
       );
-      this.smallPottySound = smallSound;
-      console.log('Small potty sound loaded');
-
-      // Load big potty sound
-      const { sound: bigSound } = await Audio.Sound.createAsync(
-        require('../assets/Audio/big_potty_effect.mp3')
-      );
-      this.bigPottySound = bigSound;
-      console.log('Big potty sound loaded');
+      this.backgroundMusic = bgMusic;
+      console.log('Background music loaded');
 
       // Load reminder sound
       const { sound: reminderSound } = await Audio.Sound.createAsync(
@@ -37,32 +36,60 @@ class SoundManager {
     }
   }
 
-  async playSmallPottySound() {
+  async playBackgroundMusic() {
     try {
-      if (this.smallPottySound) {
-        await this.smallPottySound.replayAsync();
-        console.log('Small potty sound played');
+      if (this.backgroundMusic && this.isMusicEnabled) {
+        await this.backgroundMusic.playAsync();
+        console.log('Background music started');
       } else {
-        console.log('Small potty sound not loaded');
+        console.log('Background music not loaded or disabled');
       }
     } catch (error) {
-      console.error('Error playing small potty sound:', error);
+      console.error('Error playing background music:', error);
       throw error;
     }
   }
 
-  async playBigPottySound() {
+  async stopBackgroundMusic() {
     try {
-      if (this.bigPottySound) {
-        await this.bigPottySound.replayAsync();
-        console.log('Big potty sound played');
-      } else {
-        console.log('Big potty sound not loaded');
+      if (this.backgroundMusic) {
+        await this.backgroundMusic.stopAsync();
+        console.log('Background music stopped');
       }
     } catch (error) {
-      console.error('Error playing big potty sound:', error);
+      console.error('Error stopping background music:', error);
       throw error;
     }
+  }
+
+  async setMusicVolume(volume: number) {
+    try {
+      this.musicVolume = volume;
+      if (this.backgroundMusic) {
+        await this.backgroundMusic.setVolumeAsync(volume);
+        console.log('Music volume set to:', volume);
+      }
+    } catch (error) {
+      console.error('Error setting music volume:', error);
+      throw error;
+    }
+  }
+
+  setMusicEnabled(enabled: boolean) {
+    this.isMusicEnabled = enabled;
+    if (!enabled && this.backgroundMusic) {
+      this.stopBackgroundMusic();
+    } else if (enabled && this.backgroundMusic) {
+      this.playBackgroundMusic();
+    }
+  }
+
+  getMusicEnabled(): boolean {
+    return this.isMusicEnabled;
+  }
+
+  getMusicVolume(): number {
+    return this.musicVolume;
   }
 
   async playReminderSound() {
@@ -81,13 +108,9 @@ class SoundManager {
 
   async unloadSounds() {
     try {
-      if (this.smallPottySound) {
-        await this.smallPottySound.unloadAsync();
-        this.smallPottySound = null;
-      }
-      if (this.bigPottySound) {
-        await this.bigPottySound.unloadAsync();
-        this.bigPottySound = null;
+      if (this.backgroundMusic) {
+        await this.backgroundMusic.unloadAsync();
+        this.backgroundMusic = null;
       }
       if (this.reminderSound) {
         await this.reminderSound.unloadAsync();

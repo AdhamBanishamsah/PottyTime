@@ -44,7 +44,7 @@ export default function RemindersScreen() {
     soundManager.loadSounds();
   }, []);
 
-  // Initialize and update reminders when language changes
+  // Initialize and update reminders when language changes or app state changes
   useEffect(() => {
     const defaultReminders: Reminder[] = [
       {
@@ -103,9 +103,12 @@ export default function RemindersScreen() {
         ...customReminder,
         isCustom: true,
       }));
-      return [...defaultReminders, ...customReminders];
+      const allReminders = [...defaultReminders, ...customReminders];
+      console.log('Updated reminders:', allReminders);
+      console.log('Custom reminders count:', customReminders.length);
+      return allReminders;
     });
-  }, [t]);
+  }, [t, appState.customReminders]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newReminderTitle, setNewReminderTitle] = useState('');
@@ -159,6 +162,9 @@ export default function RemindersScreen() {
       isCustom: true,
     };
 
+    console.log('Adding reminder:', newReminder);
+    console.log('Current appState.customReminders:', appState.customReminders);
+    
     addCustomReminder(newReminder);
     setNewReminderTitle('');
     setSelectedHour(8);

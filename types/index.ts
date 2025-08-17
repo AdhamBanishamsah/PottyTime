@@ -44,6 +44,10 @@ export interface TranslationKeys {
   aboutPottyPalTitle: string;
   pottyPalDescription: string;
   developer: string;
+  backgroundMusic: string;
+  backgroundMusicDesc: string;
+  musicVolume: string;
+  musicVolumeDesc: string;
   features: string;
   choosePottyBuddy: string;
   trackPottyProgress: string;

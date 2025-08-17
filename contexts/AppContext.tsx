@@ -97,10 +97,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addCustomReminder = (reminder: any) => {
+    console.log('AppContext: Adding reminder:', reminder);
+    console.log('AppContext: Current customReminders:', appState.customReminders);
+    
     const newState = {
       ...appState,
       customReminders: [...appState.customReminders, reminder],
     };
+    
+    console.log('AppContext: New state customReminders:', newState.customReminders);
     setAppState(newState);
     saveAppState(newState);
   };

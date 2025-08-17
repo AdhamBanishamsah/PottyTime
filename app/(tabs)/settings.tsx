@@ -3,6 +3,7 @@ import { Colors } from '@/constants/Colors';
 import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { soundManager } from '@/utils/sound';
 
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
@@ -10,6 +11,7 @@ import {
   Alert,
   Linking,
   Modal,
+  PanResponder,
   ScrollView,
   StyleSheet,
   Switch,
@@ -33,6 +35,56 @@ const languages: Language[] = [
   { code: 'no', name: 'Norwegian', nativeName: 'Norsk', flag: '🇳🇴' },
 ];
 
+const VolumeSlider = ({ value, onValueChange, colorScheme }: { 
+  value: number; 
+  onValueChange: (value: number) => void; 
+  colorScheme: string | null | undefined;
+}) => {
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (evt, gestureState) => {
+      const { locationX } = evt.nativeEvent;
+      const sliderWidth = 200; // Approximate width
+      const newValue = Math.max(0, Math.min(1, locationX / sliderWidth));
+      onValueChange(newValue);
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      const { locationX } = evt.nativeEvent;
+      const sliderWidth = 200; // Approximate width
+      const newValue = Math.max(0, Math.min(1, locationX / sliderWidth));
+      onValueChange(newValue);
+    },
+  });
+
+  return (
+    <View style={styles.volumeSlider} {...panResponder.panHandlers}>
+      <TouchableOpacity 
+        style={styles.volumeTrack}
+        onPress={(evt) => {
+          const { locationX } = evt.nativeEvent;
+          const sliderWidth = 200; // Approximate width
+          const newValue = Math.max(0, Math.min(1, locationX / sliderWidth));
+          onValueChange(newValue);
+        }}
+      >
+        <View 
+          style={[
+            styles.volumeFill, 
+            { width: `${value * 100}%` }
+          ]} 
+        />
+      </TouchableOpacity>
+      <View
+        style={[
+          styles.volumeThumb,
+          { left: `${value * 100}%`, transform: [{ translateX: -10 }] }
+        ]}
+      />
+    </View>
+  );
+};
+
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const { t, currentLanguage, changeLanguage } = useLanguage();
@@ -40,6 +92,8 @@ export default function SettingsScreen() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [musicEnabled, setMusicEnabled] = useState(soundManager.getMusicEnabled());
+  const [musicVolume, setMusicVolume] = useState(soundManager.getMusicVolume());
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showResetPuzzle, setShowResetPuzzle] = useState(false);
   const [puzzleAnswer, setPuzzleAnswer] = useState('');
@@ -57,6 +111,16 @@ export default function SettingsScreen() {
 
   const handleRemindersToggle = (value: boolean) => {
     setRemindersEnabled(value);
+  };
+
+  const handleMusicToggle = (value: boolean) => {
+    setMusicEnabled(value);
+    soundManager.setMusicEnabled(value);
+  };
+
+  const handleMusicVolumeChange = (value: number) => {
+    setMusicVolume(value);
+    soundManager.setMusicVolume(value);
   };
 
   const handleAboutPress = () => {
@@ -248,6 +312,39 @@ export default function SettingsScreen() {
             switchValue={remindersEnabled}
             onSwitchChange={handleRemindersToggle}
           />
+        </View>
+
+        {/* Music Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
+            {t('backgroundMusic')}
+          </Text>
+          <SettingItem
+            icon="music.note"
+            title={t('backgroundMusic')}
+            subtitle={t('backgroundMusicDesc')}
+            showSwitch={true}
+            switchValue={musicEnabled}
+            onSwitchChange={handleMusicToggle}
+          />
+          {musicEnabled && (
+            <View style={styles.volumeContainer}>
+              <View style={styles.volumeInfo}>
+                <IconSymbol name="speaker.wave.2.fill" size={20} color={Colors[colorScheme ?? 'light'].tint} />
+                <Text style={[styles.volumeLabel, { color: Colors[colorScheme ?? 'light'].text }]}>
+                  {t('musicVolume')}
+                </Text>
+                <Text style={[styles.volumePercentage, { color: Colors[colorScheme ?? 'light'].text }]}>
+                  {Math.round(musicVolume * 100)}%
+                </Text>
+              </View>
+              <VolumeSlider 
+                value={musicVolume}
+                onValueChange={handleMusicVolumeChange}
+                colorScheme={colorScheme}
+              />
+            </View>
+          )}
         </View>
 
         {/* About Section */}
@@ -664,5 +761,70 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  volumeContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginBottom: 1,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  volumeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  volumeLabel: {
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
+  volumePercentage: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  volumeSlider: {
+    position: 'relative',
+    height: 20,
+    width: 200,
+  },
+  volumeTrack: {
+    height: 4,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2,
+    position: 'relative',
+    width: '100%',
+  },
+  volumeFill: {
+    height: '100%',
+    backgroundColor: '#007AFF',
+    borderRadius: 2,
+  },
+  volumeThumb: {
+    position: 'absolute',
+    top: -8,
+    width: 20,
+    height: 20,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

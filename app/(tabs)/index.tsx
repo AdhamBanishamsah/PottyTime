@@ -38,9 +38,14 @@ export default function HomeScreen() {
   const { appState, updateSmallPottyCount, updateBigPottyCount, unlockAchievement, updateDailyProgress } = useApp();
   const [selectedBuddy, setSelectedBuddy] = useState<PottyBuddy>(pottyBuddies[0]);
 
-  // Load sounds when component mounts
+  // Load sounds and start background music when component mounts
   useEffect(() => {
-    soundManager.loadSounds();
+    const initializeAudio = async () => {
+      await soundManager.loadSounds();
+      await soundManager.playBackgroundMusic();
+    };
+    
+    initializeAudio();
     
     // Cleanup sounds when component unmounts
     return () => {
@@ -60,8 +65,6 @@ export default function HomeScreen() {
     const today = new Date().toISOString().split('T')[0];
     const todayProgress = appState.weeklyProgress[today] || { smallPotty: 0, bigPotty: 0, success: false };
     updateDailyProgress(today, todayProgress.smallPotty + 1, todayProgress.bigPotty);
-    
-    await soundManager.playSmallPottySound();
     
     // Check for achievements
     if (newCount === 1) {
@@ -85,8 +88,6 @@ export default function HomeScreen() {
     const today = new Date().toISOString().split('T')[0];
     const todayProgress = appState.weeklyProgress[today] || { smallPotty: 0, bigPotty: 0, success: false };
     updateDailyProgress(today, todayProgress.smallPotty, todayProgress.bigPotty + 1);
-    
-    await soundManager.playBigPottySound();
     
     // Check for achievements
     if (newCount === 3) {
